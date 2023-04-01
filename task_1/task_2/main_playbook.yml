@@ -1,8 +1,19 @@
 ---
-- hosts: webservers
+- hosts: webservers:loadbalancers
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+      become: true
+
+- name: Configure webservers
+  hosts: webservers
   roles:
     - set_web
 
-- hosts: loadbalancers
+- name: Configure loadbalancers
+  hosts: loadbalancers
   roles: 
     - set_loadbalancer
