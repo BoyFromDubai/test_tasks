@@ -1,0 +1,8 @@
+---
+- hosts: webservers
+  roles:
+    - set_web
+
+- hosts: loadbalancers
+  roles: 
+    - set_loadbalancer
