@@ -1,10 +1,9 @@
 ---  
   - name: Set serv as proxy
-    copy:
-      src: "loadbalancer.conf"
+    template:
+      src: "conf.j2"
       dest: "{{ dest_path }}"
     become: true
     
     notify:
-      - Restart nginx
-    
+      - Restart nginx    

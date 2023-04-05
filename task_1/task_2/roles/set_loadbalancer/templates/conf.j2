@@ -4,8 +4,9 @@ events {
 
 http {
     upstream web {
-        server 192.168.0.136;
-        server 192.168.0.137;
+        {% for host in groups['webservers'] %}
+        server {{ hostvars[host].ansible_host }};
+        {% endfor %}
     }
 
     server {
