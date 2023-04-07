@@ -5,7 +5,7 @@ events {
 http {
     upstream web {
         {% for host in groups['webservers'] %}
-        server {{ hostvars[host].ansible_host }};
+        server {{ hostvars[host]['ansible_default_ipv4']['address'] }};
         {% endfor %}
     }
 
