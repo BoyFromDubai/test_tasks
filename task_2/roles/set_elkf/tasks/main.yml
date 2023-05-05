@@ -1,0 +1,56 @@
+---
+
+- name: Set directory vars
+  set_fact:
+    conf_dir: "{{ ansible_env.HOME }}/configs" 
+    files_dir: "{{ ansible_env.HOME }}/files" 
+    logs_dir: "{{ ansible_env.HOME }}/logs" 
+
+- name: Pull ELKF images
+  docker_image:
+    name: '{{ item.value }}'
+    source: pull
+
+  loop: "{{ elkf_stack | dict2items }}"
+
+- name: Create docker-compose.yml from template
+  template:
+    src: docker-compose.yml.j2
+    dest: '{{ ansible_env.HOME }}/docker-compose.yml'
+
+- name: Create a directory if it does not exist
+  file:
+    path: "{{ item }}"
+    state: directory
+
+  loop:
+    - '{{ conf_dir }}'
+    - "{{ files_dir }}"
+    - "{{ logs_dir }}"
+
+- name: Copy files
+  copy:
+    src: '{{ item }}'
+    dest: '{{ files_dir }}/{{ item }}'
+
+  loop:
+    - test.log
+
+- name: Copy configs
+  copy:
+    mode: 0700
+    src: '{{ item }}'
+    dest: '{{ conf_dir }}/{{ item }}'
+
+  loop:
+    - filebeat.yml
+    - logstash.conf
+
+- name: Run ELKF
+  community.docker.docker_compose:
+    state: present
+    project_src: '{{ ansible_env.HOME }}'
+    files:
+    - docker-compose.yml
+
+

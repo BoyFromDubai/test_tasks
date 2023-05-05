@@ -1,0 +1,56 @@
+filebeat.config:
+  process:
+    username: root
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+# filebeat.modules:
+# - module: docker
+#   enabled: true
+#   metricsets: ["container", "cpu", "diskio", "healthcheck", "info", "memory", "network"]
+#   hosts: ["unix:///var/run/docker.sock"]
+#   config:
+#     - type: docker
+#       containers:
+#         ids:
+#           - "*"
+#       processors:
+#         - add_docker_metadata: ~
+#   period:
+#     container: 10s
+
+# processors:
+# - add_cloud_metadata: ~
+
+filebeat.inputs:
+- type: container
+  stream: stdout
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+
+processors:
+- add_docker_metadata:
+    host: "unix:///var/run/docker.sock"
+
+
+# filebeat.inputs:
+# # - type: docker
+# #   containers.ids:
+# #     - "*"
+# #   paths: 
+# #     - '/var/lib/docker/containers/*/*.log'
+# - type: log
+#   paths:
+#     - /logs_to_parse/*.log
+    
+# processors:
+# - add_docker_metadata:
+#     host: "unix:///var/run/docker.sock"
+
+output.file:
+  filename: logs.log
+  # path: /var/lib/filebeat/logs
+  path: /usr/share/filebeat/got_logs/
+
+

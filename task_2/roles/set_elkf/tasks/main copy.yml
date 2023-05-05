@@ -1,0 +1,86 @@
+---
+- name: Add ELKF admin
+  become: yes
+  user:
+    name: '{{ elkf_admin }}'
+    groups: docker
+    append: yes
+    password: "{{ 'eugene' | password_hash('sha512') }}"
+    # shell: /bin/false
+
+- name: Get home directory of "{{ elkf_admin }}"
+  getent:
+    database: passwd
+    key: "{{ elkf_admin }}"
+  register: passwd_result
+
+- name: Set home var
+  set_fact:
+    home_dir: "{{ passwd_result.ansible_facts.getent_passwd[elkf_admin].4 }}"
+
+- name: Set directory vars
+  set_fact:
+    conf_dir: "{{ home_dir }}/configs" 
+    files_dir: "{{ home_dir }}/files" 
+
+- name: Pull ELKF images
+  docker_image:
+    name: '{{ item.value }}'
+    source: pull
+
+  loop: "{{ elkf_stack | dict2items }}"
+
+- name: Create docker-compose.yml from template
+  become: yes
+  template:
+    src: docker-compose.yml.j2
+    dest: '{{ home_dir }}/docker-compose.yml'
+    owner: '{{ elkf_admin }}'
+    group: '{{ elkf_admin }}'
+
+- name: Create a directory if it does not exist
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: '{{ elkf_admin }}'
+    group: '{{ elkf_admin }}'
+
+  loop:
+    - '{{ conf_dir }}'
+    - "{{ files_dir }}"
+
+- name: Copy files
+  become: true
+  become_user: "{{ elkf_admin }}"
+  copy:
+    src: '{{ item }}'
+    dest: '{{ files_dir }}/{{ item }}'
+
+  loop:
+    - test.log
+
+- name: Copy configs
+  become: true
+  become_user: "{{ elkf_admin }}"
+  copy:
+    src: '{{ item }}'
+    dest: '{{ conf_dir }}/{{ item }}'
+
+  loop:
+    - filebeat.yml
+
+
+- name: Run ELKF
+  become: true
+  become_user: "{{ elkf_admin }}"
+  docker_compose:
+    project_name: ELKF
+    state: present
+    project_src: '{{ home_dir }}'
+    files:
+    - docker-compose.yml
+
+
+# - name: 
+

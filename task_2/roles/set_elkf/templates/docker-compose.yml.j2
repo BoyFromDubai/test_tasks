@@ -1,0 +1,86 @@
+version: '3.6'
+
+services:
+   {# elasticsearch:
+     image: 'elastic/elasticsearch:7.7.0'
+     container_name: elasticsearch
+     restart: always
+   
+     environment:
+       discovery.type: single-node
+     ports:
+       - "9200:9200"
+       - "9300:9300"
+     networks:
+       - elk
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://elasticsearch:9200"]
+       interval: 10s
+       timeout: 5s
+       retries: 10
+   kibana:
+     image: 'elastic/kibana:7.7.0'
+     container_name: kibana
+     restart: always
+     depends_on:
+       elasticsearch:
+         condition: service_healthy
+   
+     environment:
+       ELASTICSEARCH_URL: http://elasticsearch:9200
+   
+     ports:
+       - "5601:5601"
+     networks:
+       - elk #}
+
+
+   logstash:
+     image: 'elastic/logstash:{{ elkf_version }}'
+     container_name: 'logstash'
+     restart: always
+     volumes:
+       - '{{ conf_dir }}/logstash.conf:/usr/share/logstash/pipeline/logstash.conf'
+       - '{{ logs_dir }}:/usr/share/logstash/logs'
+     
+     {# depends_on:
+       elasticsearch:
+         condition: service_healthy #}
+
+     ports:
+       - '5044:5044'
+       - '9600:9600'
+     networks:
+       - elk
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://logstash:9600"]
+       interval: 10s
+       timeout: 5s
+       retries: 10
+
+
+   filebeat:
+     image: 'elastic/filebeat:{{ elkf_version }}'
+     user: 0:0
+     container_name: 'filebeat'
+     restart: always
+     environment:
+       LOGSTASH_HOST: "logstash:5044"
+     volumes:
+       - '{{ files_dir }}/test.log:/logs_to_parse/test.log'
+       - '{{ conf_dir }}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
+       - '{{ logs_dir }}:/var/lib/filebeat/logs'
+       
+       - '/var/run/docker.sock:/var/run/docker.sock:ro'
+       - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
+     depends_on:
+       logstash:
+         condition: service_healthy
+     networks:
+       - elk
+
+volumes:
+  elastic_data: {}
+
+networks:
+  elk: 

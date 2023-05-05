@@ -1,0 +1,26 @@
+version: '2.4'
+
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:{{ elkf_version }}
+    container_name: filebeat
+    restart: always
+    entrypoint: bash -c 'export PATH=$PATH:/usr/share/filebeat && /usr/local/bin/docker-entrypoint -e'
+    environment:
+      LOGSTASH_HOST: "logstash:9600"
+    volumes:
+      - '{{ files_dir }}/test.log:/logs_to_parse/test.log'
+      - '{{ conf_dir }}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
+      - '{{ logs_dir }}:/usr/share/filebeat/got_logs/'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
+    ports:
+      - '5044:5044'
+    networks:
+      - elk
+
+volumes:
+  elastic_data: {}
+
+networks:
+  elk: 

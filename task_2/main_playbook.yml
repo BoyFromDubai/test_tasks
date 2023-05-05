@@ -1,0 +1,7 @@
+---
+- name: Configure host
+  hosts: dockerhosts
+  # become: yes
+  roles:
+    - set_docker
+    - set_elkf
