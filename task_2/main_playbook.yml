@@ -3,5 +3,5 @@
   hosts: dockerhosts
   # become: yes
   roles:
-    - set_docker
+    # - set_docker
     - set_elkf

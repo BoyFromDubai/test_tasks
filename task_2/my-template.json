@@ -1,0 +1,57 @@
+{
+  "index_patterns": ["test-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "_source": {
+        "enabled": true
+      },
+      "properties": {
+        "Logger": {
+          "type": "keyword"
+        },
+        "RandomSymbols": {
+          "type": "keyword"
+        },
+        "Priority": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text"
+        },
+        "@version": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "Timestamp": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss,SSS"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "RandomNumber": {
+          "type": "long"
+        },
+        "Message": {
+          "type": "text"
+        },
+        "source": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 ---
-elkf_version: 7.7.0
+elkf_version: 6.7.2
 
 elkf_stack:
   filebeat:       'docker.elastic.co/beats/filebeat:{{ elkf_version }}'

@@ -36,15 +36,27 @@
   loop:
     - test.log
 
-- name: Copy configs
+- name: Copy filebeat configs
+  become: yes
+  copy:
+    mode: 0700
+    src: '{{ item }}'
+    group: root
+    owner: root
+    dest: '{{ conf_dir }}/{{ item }}'
+
+  loop:
+    - "filebeat_{{ elkf_version }}.yml"
+
+- name: Copy logstash configs
   copy:
     mode: 0700
     src: '{{ item }}'
     dest: '{{ conf_dir }}/{{ item }}'
 
   loop:
-    - filebeat.yml
-    - logstash.conf
+    - "logstash_{{ elkf_version }}.conf"
+
 
 - name: Run ELKF
   community.docker.docker_compose:
